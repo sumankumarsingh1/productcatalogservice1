@@ -1,5 +1,4 @@
 package com.scaler.suman.ProductCatalogService1.controllers;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.scaler.suman.ProductCatalogService1.dtos.CategoryDto;
 import com.scaler.suman.ProductCatalogService1.dtos.ProductDto;
 import com.scaler.suman.ProductCatalogService1.models.Category;
@@ -19,7 +18,7 @@ public class ProductController {
     @Autowired
     private IProductService productService;
     @GetMapping("{id}")
-    public ResponseEntity<ProductDto> getProduct(@PathVariable("id") Long productId){
+    public ResponseEntity<ProductDto> getProductById(@PathVariable("id") Long productId){
         try{
             if(productId<1 || productId>20){
                 throw new IllegalArgumentException("Product not present!");
