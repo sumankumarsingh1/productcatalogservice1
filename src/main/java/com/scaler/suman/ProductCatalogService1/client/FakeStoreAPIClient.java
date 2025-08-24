@@ -8,54 +8,45 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RequestCallback;
-import org.springframework.web.client.ResponseExtractor;
+import org.springframework.web.client.HttpMessageConverterExtractor;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import java.util.ArrayList;
 import java.util.List;
+
 @Component
 public class FakeStoreAPIClient {
     @Autowired
-    private RestTemplateBuilder restTemplateBuilder;
+    private RestTemplate restTemplate;
 
-    public FakeStoreProductDto getProductById(Long id) {
-        ResponseEntity<FakeStoreProductDto> fakeStoreProductDtoResponseEntity = requestForEntity(HttpMethod.GET,"https://fakestoreapi.com/products/{id}",null, FakeStoreProductDto.class,id);
-        if(fakeStoreProductDtoResponseEntity.getBody()!=null &&
-                fakeStoreProductDtoResponseEntity.getStatusCode().equals(HttpStatus.OK))
-        {
-            return fakeStoreProductDtoResponseEntity.getBody();
-        }
-        return null;
+    public FakeStoreProductDto[] getAllProducts(){
+        String getAllProductURL = "https://fakestoreapi.com/products";
+        FakeStoreProductDto[] response = restTemplate.getForObject(getAllProductURL, FakeStoreProductDto[].class);
+        return response;
     }
 
-    public List<FakeStoreProductDto> getAllProducts(){
-        List<FakeStoreProductDto> fakeStoreProductDtos = new ArrayList<>();
-        RestTemplate restTemplate = restTemplateBuilder.build();
-        FakeStoreProductDto[] fakeStoreProductDtosResponse =
-                restTemplate.getForEntity( "https://fakestoreapi.com/products", FakeStoreProductDto[].class).getBody();
-        for (FakeStoreProductDto fakeStoreProductDto: fakeStoreProductDtosResponse){
-            fakeStoreProductDtos.add(fakeStoreProductDto);
-        }
-        return fakeStoreProductDtos;
+    public FakeStoreProductDto getProductById(Long productId) {
+        String getProduct = "https://fakestoreapi.com/products/" + productId;
+        FakeStoreProductDto response = requestForObject(HttpMethod.GET, getProduct,null, FakeStoreProductDto.class);
+        return response;
     }
 
-    public FakeStoreProductDto replaceProduct(Long id, FakeStoreProductDto fakeStoreProductDto){
-        FakeStoreProductDto fakeStoreProductDtoReplaced = requestForEntity(HttpMethod.PUT,"https://fakestoreapi.com/products/{productId}",fakeStoreProductDto, FakeStoreProductDto.class, id).getBody();
-        return fakeStoreProductDtoReplaced;
-    }
-
-    public FakeStoreProductDto createProduct(FakeStoreProductDto fakeStoreProductDto){
-        FakeStoreProductDto fakeStoreProductDtoCreated = requestForEntity(HttpMethod.POST,"https://fakestoreapi.com/products",fakeStoreProductDto, FakeStoreProductDto.class).getBody();
+    public FakeStoreProductDto createProduct(FakeStoreProductDto fakeStoreProductDto) throws RestClientException {
+        FakeStoreProductDto fakeStoreProductDtoCreated = requestForObject(HttpMethod.POST, "https://fakestoreapi.com/products", fakeStoreProductDto, FakeStoreProductDto.class);
         return fakeStoreProductDtoCreated;
     }
 
 
-    public <T> ResponseEntity<T> requestForEntity(HttpMethod httpMethod, String url, @Nullable Object request,
-                                                  Class<T> responseType, Object... uriVariables) throws RestClientException {
-        RestTemplate restTemplate = restTemplateBuilder.build();
-        RequestCallback requestCallback = restTemplate.httpEntityCallback(request, responseType);
-        ResponseExtractor<ResponseEntity<T>> responseExtractor = restTemplate.responseEntityExtractor(responseType);
-        return restTemplate.execute(url, httpMethod, requestCallback, responseExtractor, uriVariables);
+    public FakeStoreProductDto replaceProduct(Long id, FakeStoreProductDto fakeStoreProductDto) throws RestClientException{
+        FakeStoreProductDto fakeStoreProductDtoReplaced = requestForObject(HttpMethod.PUT,"https://fakestoreapi.com/products/{productId}",fakeStoreProductDto, FakeStoreProductDto.class, id);
+        return fakeStoreProductDtoReplaced;
     }
+
+    private <T> T requestForObject(HttpMethod httpMethod, String url,  @Nullable Object request, Class<T> responseType, Object... uriVariables) throws RestClientException {
+        RequestCallback requestCallback = restTemplate.httpEntityCallback(request, responseType);
+        HttpMessageConverterExtractor<T> responseExtractor = new HttpMessageConverterExtractor(responseType, restTemplate.getMessageConverters());
+        return restTemplate.execute(url, httpMethod, requestCallback, responseExtractor, (Object[])uriVariables);
+    }
+
 
 }

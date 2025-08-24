@@ -2,7 +2,6 @@ package com.scaler.suman.ProductCatalogService1.controllers;
 
 import com.scaler.suman.ProductCatalogService1.dtos.ProductDto;
 import com.scaler.suman.ProductCatalogService1.services.IProductService;
-import com.scaler.suman.ProductCatalogService1.stubs.ProductServiceStub;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
