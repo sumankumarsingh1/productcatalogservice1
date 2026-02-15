@@ -1,7 +1,5 @@
 package com.scaler.suman.ProductCatalogService1.services;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.scaler.suman.ProductCatalogService1.models.Product;
-import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 public interface IProductService {

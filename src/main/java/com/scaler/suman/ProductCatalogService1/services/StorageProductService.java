@@ -1,5 +1,6 @@
 package com.scaler.suman.ProductCatalogService1.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.scaler.suman.ProductCatalogService1.models.Product;
 import com.scaler.suman.ProductCatalogService1.repositories.ProductRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,9 @@ public class StorageProductService implements IProductService{
 
     @Override
     public Product createProduct(Product product) {
+        try{
+            System.out.println(new ObjectMapper().writeValueAsString(product));
+        }catch (Exception e){}
         Product newProduct = productRepo.save(product);
         return newProduct;
     }

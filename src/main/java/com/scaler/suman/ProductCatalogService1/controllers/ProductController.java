@@ -1,51 +1,75 @@
 package com.scaler.suman.ProductCatalogService1.controllers;
-import com.scaler.suman.ProductCatalogService1.dtos.CategoryDto;
 import com.scaler.suman.ProductCatalogService1.dtos.ProductDto;
-import com.scaler.suman.ProductCatalogService1.models.Category;
+import com.scaler.suman.ProductCatalogService1.exceptions.ProductNotFoundException;
 import com.scaler.suman.ProductCatalogService1.models.Product;
 import com.scaler.suman.ProductCatalogService1.services.IProductService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import com.scaler.suman.ProductCatalogService1.dtos.CategoryDto;
+import com.scaler.suman.ProductCatalogService1.models.Category;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @RestController
 @RequestMapping("/products")
 public class ProductController {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
+
+    private final IProductService productService;
+
     @Autowired
-    private IProductService productService;
+    public ProductController(IProductService productService) {
+        this.productService = productService;
+    }
     @GetMapping("{id}")
-    public ResponseEntity<ProductDto> getProductById(@PathVariable("id") Long productId){
-        try{
-            if(productId<1 || productId>20){
-                throw new IllegalArgumentException("Product not present!");
+    public ResponseEntity<ProductDto> getProductById(@PathVariable("id") Long productId) {
+        logger.info("Getting product by id: {}", productId);
+        try {
+            if (productId < 1 || productId > 20) {
+                throw new ProductNotFoundException("Product not present!");
             }
-            MultiValueMap<String,String> headers=new LinkedMultiValueMap<>();
-            headers.add("called by","smart frontend");
             Product product = productService.getProductById(productId);
-            if (product==null){
-                return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            if (product == null) {
+                throw new ProductNotFoundException("Product not found");
             }
             ProductDto productDto = from(product);
-            return new ResponseEntity<>(productDto,headers,HttpStatus.OK);
-        }catch (IllegalArgumentException ex){
-            // return new ResponseEntity<>(null,HttpStatus.BAD_REQUEST);
-            throw  ex;
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("called by", "smart frontend");
+            return ResponseEntity.ok().headers(headers).body(productDto);
+        } catch (ProductNotFoundException ex) {
+            logger.error("Error retrieving product: {}", ex.getMessage(), ex);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (Exception ex) {
+            logger.error("Error retrieving product: {}", ex.getMessage(), ex);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @GetMapping
-    public List<ProductDto> getAllProducts(){
-        List<ProductDto> productDtos = new ArrayList<>();
-        List<Product> products = productService.getAllProducts();
-        for (Product product: products){
-            productDtos.add(from(product));
+    public ResponseEntity<List<ProductDto>> getAllProducts() {
+        try {
+            List<Product> products = productService.getAllProducts();
+            if (products == null) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+            List<ProductDto> productDtos = products.stream()
+                    .map(this::from)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(productDtos);
+        } catch (Exception ex) {
+            logger.error("Error retrieving products: {}", ex.getMessage(), ex);
+            throw ex;
         }
-        return productDtos;
     }
+
     @PutMapping("{id}")
     public ProductDto replaceProduct(@PathVariable("id") Long productId, @RequestBody ProductDto productDto){
         Product product = from(productDto);
@@ -54,7 +78,11 @@ public class ProductController {
     }
     @PostMapping
     public ProductDto createProduct(@RequestBody ProductDto productDto){
-        return from(productService.createProduct(from(productDto)));
+        Product product = from(productDto);
+        try{
+            System.out.println(new ObjectMapper().writeValueAsString(product) );
+        }catch (Exception e){}
+        return from(productService.createProduct(product));
     }
 
     private Product from(ProductDto productDto){

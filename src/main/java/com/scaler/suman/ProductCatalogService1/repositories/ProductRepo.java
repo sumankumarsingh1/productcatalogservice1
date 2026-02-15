@@ -2,18 +2,23 @@ package com.scaler.suman.ProductCatalogService1.repositories;
 
 import com.scaler.suman.ProductCatalogService1.models.Product;
 import com.scaler.suman.ProductCatalogService1.models.State;
+
+import io.micrometer.common.lang.NonNull;
+
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 
-import java.nio.DoubleBuffer;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface ProductRepo extends JpaRepository<Product, Long> {
-    @Override
+
+    Page<Product> findProductsByName(String query, PageRequest pageable);
     Optional<Product> findById(Long id);
     List<Product> findProductByPriceBetween(Double low, Double high);
     List<Product> findAllByIsPrimeSpecific(Boolean value);

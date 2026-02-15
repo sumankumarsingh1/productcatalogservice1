@@ -5,8 +5,6 @@ import com.scaler.suman.ProductCatalogService1.dtos.ProductDto;
 import com.scaler.suman.ProductCatalogService1.models.Product;
 import com.scaler.suman.ProductCatalogService1.services.IProductService;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -32,9 +30,6 @@ public class ProductControllerMvcTests {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private ProductController productController;
 
     @Test
     public void getAllProducts_Runs_Successfully() throws Exception {

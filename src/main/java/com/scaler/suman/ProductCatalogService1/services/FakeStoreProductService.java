@@ -5,14 +5,11 @@ import com.scaler.suman.ProductCatalogService1.dtos.FakeStoreProductDto;
 import com.scaler.suman.ProductCatalogService1.models.Category;
 import com.scaler.suman.ProductCatalogService1.models.Product;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 @Service
 public class FakeStoreProductService implements IProductService {
-    @Autowired
-    private RestTemplateBuilder restTemplateBuilder;
     @Autowired
     private FakeStoreAPIClient fakeStoreAPIClient;
     @Override
@@ -22,7 +19,7 @@ public class FakeStoreProductService implements IProductService {
     @Override
     public List<Product> getAllProducts(){
         List<Product> products = new ArrayList<>();
-        FakeStoreProductDto[] fakeStoreProductDtos = fakeStoreAPIClient.getAllProducts();
+        List<FakeStoreProductDto> fakeStoreProductDtos = fakeStoreAPIClient.getAllProducts();
         for(FakeStoreProductDto fakeStoreProductDto: fakeStoreProductDtos){
             products.add(from(fakeStoreProductDto));
         }

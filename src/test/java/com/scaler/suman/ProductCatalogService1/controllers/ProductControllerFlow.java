@@ -1,7 +1,6 @@
 package com.scaler.suman.ProductCatalogService1.controllers;
 
 import com.scaler.suman.ProductCatalogService1.dtos.ProductDto;
-import com.scaler.suman.ProductCatalogService1.services.IProductService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,9 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class ProductControllerFlow {
     @Autowired
     ProductController productController;
-
-    @Autowired
-    private IProductService productService;
 
     @Test
     public void Test_Create_Replace_Get_Product_RunsSuccessfully(){
